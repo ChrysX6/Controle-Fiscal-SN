@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle Simples Nacional</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- TELA DE LOGIN -->
+  <div id="tela-login">
+    <div class="caixa-login">
+      <img src="https://chrysx6.github.io/LinksAguiaContab/links/img/logo1.jpg" alt="Logo">
+      <h2>Controle Simples Nacional</h2>
+      <p id="erro-login">Senha incorreta. Tente novamente.</p>
+      <input type="password" id="input-senha" placeholder="Digite a senha de acesso" onkeydown="if(event.key==='Enter') fazerLogin()">
+      <button onclick="fazerLogin()">Entrar</button>
+    </div>
+  </div>
+
+  <!-- APP PRINCIPAL -->
+  <div id="app" style="display:none;">
+
+    <header>
+      <div class="header-left">
+        <img id="logo-empresa" src="" alt="Logo">
+        <h1>Controle Simples Nacional</h1>
+      </div>
+      <div class="header-right">
+        <a id="btn-abrir-planilha" href="#" target="_blank">📄 Abrir Planilha</a>
+        <button class="btn-duplicar" onclick="abrirModalDuplicarMes()">📋 Duplicar Mês Anterior</button>
+        <button onclick="abrirModalNovoMes()">🗓️ Criar Novo Mês</button>
+        <button class="btn-sair" onclick="sair()">Sair</button>
+      </div>
+    </header>
+
+    <div id="botoes-meses"></div>
+    <div id="abas-categorias"></div>
+
+    <div id="dashboard-container"></div>
+
+    <div class="conteudo">
+      <div class="barra-acoes">
+        <div class="barra-acoes-esquerda">
+          <button class="btn-adicionar" onclick="abrirModalAdicionar()">+ Adicionar Empresa</button>
+          <button class="btn-exportar" id="btn-exportar" onclick="toggleMenuExportar()">⬇️ Exportar</button>
+          <div class="menu-exportar" id="menu-exportar">
+            <button onclick="exportarCSV()">📊 Exportar CSV / Excel</button>
+            <button onclick="exportarPDF()">📄 Exportar PDF</button>
+          </div>
+        </div>
+        <span id="status-salvando"></span>
+      </div>
+
+      <div id="tabela-container">
+        <p class="carregando">Carregando...</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODAL ADICIONAR EMPRESA -->
+  <div class="modal" id="modal-adicionar">
+    <div class="modal-caixa">
+      <h3>Adicionar Empresa</h3>
+      <div id="campos-nova-empresa"></div>
+      <div class="modal-botoes">
+        <button class="btn-confirmar" onclick="confirmarAdicionarEmpresa()">Salvar</button>
+        <button class="btn-cancelar" onclick="fecharModalAdicionar()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL NOVO MÊS -->
+  <div class="modal" id="modal-novo-mes">
+    <div class="modal-caixa">
+      <h3>Criar Novo Mês</h3>
+      <label>Digite o nome do novo mês (ex: SETEMBRO):</label>
+      <input type="text" id="input-novo-mes" class="campo-modal">
+      <div class="modal-botoes">
+        <button class="btn-confirmar" onclick="confirmarNovoMes()">Criar</button>
+        <button class="btn-cancelar" onclick="fecharModalNovoMes()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DUPLICAR MÊS ANTERIOR -->
+  <div class="modal" id="modal-duplicar-mes">
+    <div class="modal-caixa">
+      <h3>Duplicar Mês Anterior</h3>
+      <label>Digite o nome do novo mês (ex: SETEMBRO):</label>
+      <input type="text" id="input-mes-duplicado" class="campo-modal">
+      <p id="info-mes-origem"></p>
+      <div class="modal-botoes">
+        <button class="btn-confirmar" onclick="confirmarDuplicarMes()">Duplicar</button>
+        <button class="btn-cancelar" onclick="fecharModalDuplicarMes()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="meses.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
