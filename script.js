@@ -45,7 +45,7 @@ function sair() {
 }
 
 // ---------------------------------------------------------
-// CHAMADAS AO APPS SCRIPT (sempre POST + text/plain para evitar CORS)
+// CHAMADAS AO APPS SCRIPT
 // ---------------------------------------------------------
 
 function chamarBackend(acao, extras) {
@@ -53,14 +53,10 @@ function chamarBackend(acao, extras) {
 
   return fetch(APPS_SCRIPT_URL, {
     method: "POST",
-    headers: {
-      "Content-Type": "text/plain;charset=utf-8"
-    },
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify(corpo)
   })
-    .then(function (resposta) {
-      return resposta.json();
-    })
+    .then(function (resposta) { return resposta.json(); })
     .then(function (json) {
       if (!json.ok) {
         throw new Error(json.erro || "Erro desconhecido no servidor.");
@@ -79,15 +75,6 @@ function iniciarApp() {
 
   carregarMeses();
   montarAbasCategorias();
-
-  // Fecha o menu de exportação se clicar fora dele
-  document.addEventListener("click", function (e) {
-    const menu = document.getElementById("menu-exportar");
-    const btn = document.getElementById("btn-exportar");
-    if (menu && menu.style.display === "block" && !menu.contains(e.target) && e.target !== btn) {
-      menu.style.display = "none";
-    }
-  });
 }
 
 function carregarMeses() {
@@ -165,7 +152,6 @@ function nomeAbaAtual() {
 function carregarDados() {
   const container = document.getElementById("tabela-container");
   container.innerHTML = "<p class='carregando'>Carregando...</p>";
-  document.getElementById("dashboard-container").innerHTML = "";
 
   chamarBackend("getDados", { aba: nomeAbaAtual() })
     .then(function (dados) {
@@ -176,33 +162,19 @@ function carregarDados() {
     })
     .catch(function (erro) {
       container.innerHTML = "<p class='erro-msg'>Erro ao carregar dados: " + erro.message + "</p>";
+      const dash = document.getElementById("dashboard-container");
+      if (dash) dash.innerHTML = "";
     });
 }
 
 // ---------------------------------------------------------
-// DETECÇÃO DE COLUNAS DE TEXTO x CHECKLIST
+// DETECÇÃO DE COLUNAS DE TEXTO x STATUS (3 ESTADOS)
 // ---------------------------------------------------------
-// Colunas cujo cabeçalho contenha uma dessas palavras-chave
-// NUNCA viram checkbox (são texto, número livre ou observação).
-// Todas as demais colunas (PREF., PRES., TOM., PGDAS, E-MAIL,
-// DIFAL, CONSULTA, IMPOSTO, ENVIOS, SAIDAS, ENTRADAS etc.)
-// viram checkbox automaticamente.
+
 const PALAVRAS_TEXTO = [
-  "empresa",
-  "anexo",
-  "observ",
-  "total de empresas",
-  "feita",
-  "feito",
-  "enviada",
-  "enviado",
-  "valor emitido",
-  "cnpj",
-  "endereco",
-  "telefone",
-  "celular",
-  "contato",
-  "responsavel"
+  "empresa", "anexo", "observ", "total de empresas", "feita", "feito",
+  "enviada", "enviado", "valor emitido", "cnpj", "endereco", "telefone",
+  "celular", "contato", "responsavel"
 ];
 
 function normalizar(texto) {
@@ -217,6 +189,20 @@ function headerEhTexto(colIndex) {
 
 function colunaEhBinaria(colIndex) {
   return !headerEhTexto(colIndex);
+}
+
+function normalizarValorStatus(valorStr, valorNormalizado) {
+  if (valorNormalizado === "sim" || valorStr === "1") return "Sim";
+  if (valorNormalizado === "nao" || valorStr === "0") return "Não";
+  if (valorNormalizado === "n/a" || valorNormalizado === "na" || valorNormalizado === "n.a" || valorNormalizado === "n.a.") return "N/A";
+  return "";
+}
+
+function classeStatus(valor) {
+  if (valor === "Sim") return "sim";
+  if (valor === "Não") return "nao";
+  if (valor === "N/A") return "na";
+  return "vazio";
 }
 
 function renderizarTabela() {
@@ -238,32 +224,26 @@ function renderizarTabela() {
   }
 
   linhasAtuais.forEach(function (linhaObj) {
-    html += "<tr>";
+    html += "<tr data-linha='" + linhaObj.linha + "'>";
     linhaObj.valores.forEach(function (valor, colIndex) {
       const valorStr = (valor === null || valor === undefined) ? "" : String(valor).trim();
       const valorNormalizado = normalizar(valorStr);
+      const colunaBinaria = colunaEhBinaria(colIndex);
 
-      const ehBinarioNumerico = valorStr === "0" || valorStr === "1";
-      const ehSimNaoValor = valorNormalizado === "sim" || valorNormalizado === "nao";
+      if (colunaBinaria) {
+        const valorAtual = normalizarValorStatus(valorStr, valorNormalizado);
 
-      // Valor "reconhecível" como binário: já é sim/não, 0/1, ou está vazio
-      const valorReconhecivel = ehBinarioNumerico || ehSimNaoValor || valorStr === "";
-
-      // A coluna vira checklist se NÃO for de texto E o valor for reconhecível
-      const ehBinario = colunaEhBinaria(colIndex) && valorReconhecivel;
-
-      if (ehBinario) {
-        const marcado = valorStr === "1" || valorNormalizado === "sim";
-        const valorMarcado = ehBinarioNumerico || valorStr === "" ? "1" : "Sim";
-        const valorDesmarcado = ehBinarioNumerico || valorStr === "" ? "0" : "Não";
-
-        html += "<td class='celula-check'><input type='checkbox' " +
-          (marcado ? "checked" : "") +
-          " onchange=\"editarCelula(" + linhaObj.linha + ", " + colIndex + ", this.checked ? '" +
-          valorMarcado + "' : '" + valorDesmarcado + "', this)\"></td>";
+        html += "<td class='celula-status' data-col='" + colIndex + "'>" +
+          "<select class='select-status status-" + classeStatus(valorAtual) + "' " +
+          "onchange=\"this.className='select-status status-' + classeStatus(this.value); editarCelula(" + linhaObj.linha + ", " + colIndex + ", this.value); marcarSalvo(this);\">" +
+          "<option value=''" + (valorAtual === "" ? " selected" : "") + ">-</option>" +
+          "<option value='Sim'" + (valorAtual === "Sim" ? " selected" : "") + ">Sim</option>" +
+          "<option value='Não'" + (valorAtual === "Não" ? " selected" : "") + ">Não</option>" +
+          "<option value='N/A'" + (valorAtual === "N/A" ? " selected" : "") + ">N/A</option>" +
+          "</select></td>";
       } else {
         html += "<td><input type='text' class='campo-texto' value=\"" + escaparHtml(valorStr) + "\" " +
-          "onblur=\"editarCelula(" + linhaObj.linha + ", " + colIndex + ", this.value, this)\"></td>";
+          "onblur=\"editarCelula(" + linhaObj.linha + ", " + colIndex + ", this.value); marcarSalvo(this);\"></td>";
       }
     });
 
@@ -281,60 +261,72 @@ function escaparHtml(texto) {
   return div.innerHTML;
 }
 
+function marcarSalvo(elemento) {
+  const celula = elemento.closest("td");
+  if (!celula) return;
+  celula.classList.add("celula-salva");
+  setTimeout(function () { celula.classList.remove("celula-salva"); }, 900);
+}
+
 // ---------------------------------------------------------
 // DASHBOARD DE INDICADORES
 // ---------------------------------------------------------
 
 function renderizarDashboard() {
   const container = document.getElementById("dashboard-container");
-  container.innerHTML = "";
+  if (!container) return;
 
   if (!headersAtuais || headersAtuais.length === 0 || linhasAtuais.length === 0) {
+    container.innerHTML = "";
     return;
   }
 
-  const totalEmpresas = linhasAtuais.length;
-  let htmlCards = "";
+  let html = "<div class='dashboard-cards'>";
+  let algumCard = false;
 
   headersAtuais.forEach(function (header, colIndex) {
-    if (headerEhTexto(colIndex)) return;
+    if (!colunaEhBinaria(colIndex)) return;
 
-    let feitos = 0;
+    let totalSim = 0, totalNao = 0, totalNA = 0;
 
     linhasAtuais.forEach(function (linhaObj) {
       const valor = linhaObj.valores[colIndex];
       const valorStr = (valor === null || valor === undefined) ? "" : String(valor).trim();
       const valorNormalizado = normalizar(valorStr);
-      if (valorStr === "1" || valorNormalizado === "sim") {
-        feitos++;
-      }
+      const valorPadrao = normalizarValorStatus(valorStr, valorNormalizado);
+
+      if (valorPadrao === "Sim") totalSim++;
+      else if (valorPadrao === "Não") totalNao++;
+      else if (valorPadrao === "N/A") totalNA++;
     });
 
-    const pendentes = totalEmpresas - feitos;
-    const porcentagem = totalEmpresas > 0 ? Math.round((feitos / totalEmpresas) * 100) : 0;
+    const totalConsiderado = totalSim + totalNao;
+    if (totalConsiderado === 0) return;
 
+    const percentual = Math.round((totalSim / totalConsiderado) * 100);
     let corBarra = "#c0392b";
-    if (porcentagem >= 40) corBarra = "#f0a500";
-    if (porcentagem >= 80) corBarra = "#2e7d32";
+    if (percentual >= 40) corBarra = "#e6a817";
+    if (percentual >= 80) corBarra = "#2e7d32";
 
-    htmlCards += "<div class='card-indicador'>" +
+    algumCard = true;
+    html += "<div class='card-indicador'>" +
       "<div class='card-titulo'>" + (header || "") + "</div>" +
-      "<div class='card-numeros'><strong>" + feitos + "</strong> / " + totalEmpresas + "</div>" +
-      "<div class='card-barra-fundo'><div class='card-barra-preenchida' style='width:" + porcentagem + "%; background:" + corBarra + ";'></div></div>" +
-      "<div class='card-legenda'>" + porcentagem + "% concluído · " + pendentes + " pendente(s)</div>" +
+      "<div class='card-numeros'>" + totalSim + " / " + totalConsiderado +
+      (totalNA > 0 ? " <span class='card-na'>(" + totalNA + " N/A)</span>" : "") + "</div>" +
+      "<div class='barra-progresso'><div class='barra-preenchida' style='width:" + percentual + "%; background:" + corBarra + ";'></div></div>" +
+      "<div class='card-percentual'>" + percentual + "%</div>" +
       "</div>";
   });
 
-  if (htmlCards) {
-    container.innerHTML = "<div class='dashboard-titulo'>📊 Indicadores - " + totalEmpresas + " empresa(s) na aba</div><div class='dashboard-cards'>" + htmlCards + "</div>";
-  }
+  html += "</div>";
+  container.innerHTML = algumCard ? html : "";
 }
 
 // ---------------------------------------------------------
 // EDITAR / ADICIONAR / REMOVER
 // ---------------------------------------------------------
 
-function editarCelula(linha, coluna, valor, elemento) {
+function editarCelula(linha, coluna, valor) {
   mostrarStatusSalvando("Salvando...", null);
 
   chamarBackend("salvarCelula", {
@@ -345,20 +337,10 @@ function editarCelula(linha, coluna, valor, elemento) {
   })
     .then(function () {
       mostrarStatusSalvando("Salvo!", true);
-
-      // Atualiza o valor em memória e recalcula o dashboard sem recarregar tudo
       const linhaObj = linhasAtuais.find(function (l) { return l.linha === linha; });
       if (linhaObj) {
         linhaObj.valores[coluna] = valor;
-      }
-      renderizarDashboard();
-
-      if (elemento) {
-        const celula = elemento.closest("td");
-        if (celula) {
-          celula.classList.add("celula-salva");
-          setTimeout(function () { celula.classList.remove("celula-salva"); }, 1200);
-        }
+        renderizarDashboard();
       }
     })
     .catch(function (erro) {
@@ -387,10 +369,7 @@ function confirmarAdicionarEmpresa() {
     return el ? el.value : "";
   });
 
-  chamarBackend("adicionarEmpresa", {
-    aba: nomeAbaAtual(),
-    dados: dados
-  })
+  chamarBackend("adicionarEmpresa", { aba: nomeAbaAtual(), dados: dados })
     .then(function () {
       fecharModalAdicionar();
       carregarDados();
@@ -403,16 +382,9 @@ function confirmarAdicionarEmpresa() {
 function removerEmpresa(linha) {
   if (!confirm("Tem certeza que deseja remover esta empresa?")) return;
 
-  chamarBackend("removerEmpresa", {
-    aba: nomeAbaAtual(),
-    linha: linha
-  })
-    .then(function () {
-      carregarDados();
-    })
-    .catch(function (erro) {
-      alert("Erro ao remover empresa: " + erro.message);
-    });
+  chamarBackend("removerEmpresa", { aba: nomeAbaAtual(), linha: linha })
+    .then(function () { carregarDados(); })
+    .catch(function (erro) { alert("Erro ao remover empresa: " + erro.message); });
 }
 
 // ---------------------------------------------------------
@@ -455,11 +427,13 @@ function abrirModalDuplicarMes() {
   document.getElementById("modal-duplicar-mes").style.display = "flex";
   document.getElementById("input-mes-duplicado").value = "";
 
-  const origemInfo = document.getElementById("info-mes-origem");
-  const ultimoMes = mesesDisponiveis.length > 0 ? mesesDisponiveis[mesesDisponiveis.length - 1] : null;
-  origemInfo.textContent = ultimoMes
-    ? "A lista de empresas será copiada de: " + ultimoMes
-    : "Nenhum mês existente encontrado para copiar.";
+  const infoMesOrigem = document.getElementById("info-mes-origem");
+  if (mesesDisponiveis && mesesDisponiveis.length > 0) {
+    const mesOrigem = mesesDisponiveis[mesesDisponiveis.length - 1];
+    infoMesOrigem.textContent = "As empresas serão copiadas de: " + mesOrigem.charAt(0) + mesOrigem.slice(1).toLowerCase();
+  } else {
+    infoMesOrigem.textContent = "Nenhum mês existente encontrado para duplicar.";
+  }
 }
 
 function fecharModalDuplicarMes() {
@@ -467,33 +441,33 @@ function fecharModalDuplicarMes() {
 }
 
 function confirmarDuplicarMes() {
-  const nomeMesNovo = document.getElementById("input-mes-duplicado").value.trim().toUpperCase();
+  const nomeMes = document.getElementById("input-mes-duplicado").value.trim().toUpperCase();
 
-  if (!nomeMesNovo) {
+  if (!nomeMes) {
     alert("Digite o nome do novo mês.");
     return;
   }
 
-  if (mesesDisponiveis.length === 0) {
+  if (!mesesDisponiveis || mesesDisponiveis.length === 0) {
     alert("Não há nenhum mês existente para duplicar.");
     return;
   }
 
   const mesOrigem = mesesDisponiveis[mesesDisponiveis.length - 1];
 
-  chamarBackend("duplicarMes", { mesOrigem: mesOrigem, mesDestino: nomeMesNovo })
+  chamarBackend("duplicarMes", { mesOrigem: mesOrigem, mesDestino: nomeMes })
     .then(function (resultado) {
       fecharModalDuplicarMes();
-      alert("Mês " + nomeMesNovo + " criado com base em " + mesOrigem + "!\nAbas: " + resultado.abas.join(", "));
+      alert("Mês duplicado com sucesso a partir de " + mesOrigem + ": " + resultado.abas.join(", "));
       carregarMeses();
     })
     .catch(function (erro) {
-      alert("Erro ao duplicar mês: " + erro.message);
+      alert("Erro ao duplicar o mês: " + erro.message);
     });
 }
 
 // ---------------------------------------------------------
-// EXPORTAR (CSV/EXCEL E PDF)
+// EXPORTAR (CSV/Excel e PDF)
 // ---------------------------------------------------------
 
 function toggleMenuExportar() {
@@ -502,91 +476,82 @@ function toggleMenuExportar() {
 }
 
 function exportarCSV() {
-  if (!headersAtuais.length) {
+  if (!headersAtuais || headersAtuais.length === 0) {
     alert("Não há dados para exportar.");
     return;
   }
 
-  let csv = headersAtuais.map(escaparCsv).join(";") + "\n";
+  let conteudo = headersAtuais.join(";") + "\n";
 
   linhasAtuais.forEach(function (linhaObj) {
-    csv += linhaObj.valores.map(function (v) {
-      let valor = (v === null || v === undefined) ? "" : String(v);
-      const normalizado = normalizar(valor);
-      if (valor === "1") valor = "SIM";
-      if (valor === "0") valor = "NÃO";
-      if (normalizado === "sim") valor = "SIM";
-      if (normalizado === "nao") valor = "NÃO";
-      return escaparCsv(valor);
-    }).join(";") + "\n";
+    const linhaFormatada = linhaObj.valores.map(function (valor, colIndex) {
+      const valorStr = (valor === null || valor === undefined) ? "" : String(valor).trim();
+      if (colunaEhBinaria(colIndex)) {
+        const valorNormalizado = normalizar(valorStr);
+        return normalizarValorStatus(valorStr, valorNormalizado) || "";
+      }
+      return valorStr.replace(/;/g, ",");
+    });
+    conteudo += linhaFormatada.join(";") + "\n";
   });
 
-  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const blob = new Blob(["\uFEFF" + conteudo], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "Simples_Nacional_" + nomeAbaAtual() + ".csv";
+  link.href = url;
+  link.download = nomeAbaAtual() + ".csv";
+  document.body.appendChild(link);
   link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 
   document.getElementById("menu-exportar").style.display = "none";
 }
 
-function escaparCsv(texto) {
-  const valor = String(texto === null || texto === undefined ? "" : texto);
-  if (valor.indexOf(";") > -1 || valor.indexOf("\"") > -1 || valor.indexOf("\n") > -1) {
-    return "\"" + valor.replace(/"/g, "\"\"") + "\"";
-  }
-  return valor;
-}
-
 function exportarPDF() {
-  if (!headersAtuais.length) {
+  if (!headersAtuais || headersAtuais.length === 0) {
     alert("Não há dados para exportar.");
     return;
   }
 
+  const catNome = CONFIG.CATEGORIAS.find(function (c) { return c.sufixo === categoriaAtual; });
   const dataGeracao = new Date().toLocaleString("pt-BR");
-  const nomeCategoria = CONFIG.CATEGORIAS.find(function (c) { return c.sufixo === categoriaAtual; });
 
-  let tabelaHtml = "<table><thead><tr>";
-  headersAtuais.forEach(function (h) { tabelaHtml += "<th>" + (h || "") + "</th>"; });
-  tabelaHtml += "</tr></thead><tbody>";
+  let html = "<html><head><meta charset='UTF-8'><title>Relatório</title>";
+  html += "<style>";
+  html += "body{font-family:Arial, sans-serif; padding:20px;}";
+  html += "h1{color:#0b1d3a; font-size:18px; margin-bottom:0;}";
+  html += "p.info{color:#555; font-size:12px; margin-top:4px;}";
+  html += "table{width:100%; border-collapse:collapse; margin-top:16px;}";
+  html += "th{background:#0b1d3a; color:#fff; padding:6px; font-size:11px; text-align:left; border:1px solid #0b1d3a;}";
+  html += "td{padding:6px; font-size:11px; border:1px solid #ccc;}";
+  html += "</style></head><body>";
+  html += "<h1>Controle Simples Nacional - " + mesAtual + " (" + (catNome ? catNome.nome : categoriaAtual) + ")</h1>";
+  html += "<p class='info'>Gerado em: " + dataGeracao + "</p>";
+  html += "<table><thead><tr>";
+  headersAtuais.forEach(function (h) { html += "<th>" + (h || "") + "</th>"; });
+  html += "</tr></thead><tbody>";
 
   linhasAtuais.forEach(function (linhaObj) {
-    tabelaHtml += "<tr>";
-    linhaObj.valores.forEach(function (v) {
-      let valor = (v === null || v === undefined) ? "" : String(v);
-      const normalizado = normalizar(valor);
-      if (valor === "1" || normalizado === "sim") valor = "✔ SIM";
-      if (valor === "0" || normalizado === "nao") valor = "✘ NÃO";
-      tabelaHtml += "<td>" + valor + "</td>";
+    html += "<tr>";
+    linhaObj.valores.forEach(function (valor, colIndex) {
+      const valorStr = (valor === null || valor === undefined) ? "" : String(valor).trim();
+      let exibir = valorStr;
+      if (colunaEhBinaria(colIndex)) {
+        const valorNormalizado = normalizar(valorStr);
+        exibir = normalizarValorStatus(valorStr, valorNormalizado) || "-";
+      }
+      html += "<td>" + escaparHtml(exibir) + "</td>";
     });
-    tabelaHtml += "</tr>";
+    html += "</tr>";
   });
-  tabelaHtml += "</tbody></table>";
+
+  html += "</tbody></table></body></html>";
 
   const janela = window.open("", "_blank");
-  janela.document.write(
-    "<html><head><title>Relatório - " + nomeAbaAtual() + "</title>" +
-    "<style>" +
-    "body{font-family:Arial,sans-serif;padding:20px;color:#111;}" +
-    "h1{color:#0b1d3a;font-size:18px;margin-bottom:2px;}" +
-    "p{color:#555;font-size:12px;margin-top:0;}" +
-    "table{width:100%;border-collapse:collapse;margin-top:14px;}" +
-    "th{background:#0b1d3a;color:#fff;padding:6px;text-align:left;font-size:11px;}" +
-    "td{padding:6px;border-bottom:1px solid #ddd;font-size:11px;}" +
-    "tr:nth-child(even){background:#f7f9fc;}" +
-    "</style></head><body>" +
-    "<h1>Controle Simples Nacional - " + mesAtual + " / " + (nomeCategoria ? nomeCategoria.nome : categoriaAtual) + "</h1>" +
-    "<p>Gerado em " + dataGeracao + "</p>" +
-    tabelaHtml +
-    "</body></html>"
-  );
+  janela.document.write(html);
   janela.document.close();
-  janela.focus();
-
-  setTimeout(function () {
-    janela.print();
-  }, 400);
+  setTimeout(function () { janela.print(); }, 500);
 
   document.getElementById("menu-exportar").style.display = "none";
 }
@@ -602,11 +567,17 @@ function mostrarStatusSalvando(texto, sucesso) {
   status.style.display = "inline-block";
 
   if (sucesso !== null) {
-    setTimeout(function () {
-      status.style.display = "none";
-    }, 2500);
+    setTimeout(function () { status.style.display = "none"; }, 2500);
   }
 }
+
+document.addEventListener("click", function (e) {
+  const menu = document.getElementById("menu-exportar");
+  const btn = document.getElementById("btn-exportar");
+  if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
+    menu.style.display = "none";
+  }
+});
 
 // ---------------------------------------------------------
 // START
