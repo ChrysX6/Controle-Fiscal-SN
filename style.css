@@ -29,15 +29,8 @@ body {
   width: 320px;
 }
 
-.caixa-login img {
-  width: 90px;
-  margin-bottom: 15px;
-}
-
-.caixa-login h2 {
-  margin-bottom: 20px;
-  color: #0b1d3a;
-}
+.caixa-login img { width: 90px; margin-bottom: 15px; }
+.caixa-login h2 { margin-bottom: 20px; color: #0b1d3a; }
 
 .caixa-login input {
   width: 100%;
@@ -59,9 +52,7 @@ body {
   cursor: pointer;
 }
 
-.caixa-login button:hover {
-  background: #142c54;
-}
+.caixa-login button:hover { background: #142c54; }
 
 #erro-login {
   display: none;
@@ -82,27 +73,11 @@ header {
   gap: 10px;
 }
 
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
+.header-left { display: flex; align-items: center; gap: 12px; }
+.header-left img { height: 36px; border-radius: 4px; }
+.header-left h1 { font-size: 18px; margin: 0; }
 
-.header-left img {
-  height: 36px;
-  border-radius: 4px;
-}
-
-.header-left h1 {
-  font-size: 18px;
-  margin: 0;
-}
-
-.header-right {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
+.header-right { display: flex; gap: 10px; flex-wrap: wrap; }
 
 .header-right a, .header-right button {
   text-decoration: none;
@@ -116,13 +91,8 @@ header {
   font-weight: 600;
 }
 
-.header-right .btn-duplicar {
-  background: #6a3fb5;
-}
-
-.header-right .btn-sair {
-  background: #c0392b;
-}
+.header-right .btn-duplicar { background: #6a3fb5; }
+.header-right .btn-sair { background: #c0392b; }
 
 /* ---------- MESES / CATEGORIAS ---------- */
 #botoes-meses, #abas-categorias {
@@ -143,22 +113,10 @@ header {
   font-size: 13px;
 }
 
-.btn-mes.ativo, .btn-categoria.ativo {
-  background: #0b1d3a;
-  color: #fff;
-}
+.btn-mes.ativo, .btn-categoria.ativo { background: #0b1d3a; color: #fff; }
 
-/* ---------- DASHBOARD DE INDICADORES ---------- */
-#dashboard-container {
-  padding: 16px 24px 0;
-}
-
-.dashboard-titulo {
-  font-size: 14px;
-  font-weight: 700;
-  color: #0b1d3a;
-  margin-bottom: 10px;
-}
+/* ---------- DASHBOARD ---------- */
+#dashboard-container { padding: 16px 24px 0; }
 
 .dashboard-cards {
   display: grid;
@@ -170,7 +128,7 @@ header {
   background: #fff;
   border-radius: 10px;
   padding: 12px 14px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
   border-left: 4px solid #1e63d0;
 }
 
@@ -178,55 +136,44 @@ header {
   font-size: 12px;
   font-weight: 700;
   color: #0b1d3a;
+  text-transform: uppercase;
+  margin-bottom: 6px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-bottom: 6px;
 }
 
-.card-numeros {
-  font-size: 16px;
-  color: #333;
-  margin-bottom: 8px;
-}
+.card-numeros { font-size: 15px; font-weight: 700; color: #333; }
+.card-na { font-size: 11px; font-weight: 500; color: #888; }
 
-.card-barra-fundo {
-  background: #e6e9ef;
-  border-radius: 6px;
+.barra-progresso {
+  background: #eee;
+  border-radius: 10px;
   height: 8px;
+  margin: 8px 0 4px;
   overflow: hidden;
 }
 
-.card-barra-preenchida {
-  height: 100%;
-  border-radius: 6px;
-  transition: width 0.4s ease;
-}
+.barra-preenchida { height: 100%; border-radius: 10px; transition: width 0.3s ease; }
 
-.card-legenda {
-  font-size: 11px;
-  color: #777;
-  margin-top: 6px;
-}
+.card-percentual { font-size: 12px; font-weight: 600; color: #555; text-align: right; }
 
 /* ---------- CONTEÚDO ---------- */
-.conteudo {
-  padding: 20px 24px;
-}
+.conteudo { padding: 20px 24px; }
 
 .barra-acoes {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
-  gap: 10px;
   flex-wrap: wrap;
+  gap: 10px;
 }
 
 .barra-acoes-esquerda {
   display: flex;
-  gap: 10px;
   align-items: center;
+  gap: 10px;
   position: relative;
 }
 
@@ -241,7 +188,7 @@ header {
 }
 
 .btn-exportar {
-  background: #0b1d3a;
+  background: #0e8a6d;
   color: #fff;
   border: none;
   padding: 10px 16px;
@@ -250,17 +197,18 @@ header {
   font-weight: 600;
 }
 
+/* Menu suspenso de exportação */
 .menu-exportar {
   display: none;
   position: absolute;
-  top: 44px;
+  top: 46px;
   left: 0;
   background: #fff;
   border-radius: 8px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
   overflow: hidden;
-  z-index: 50;
-  min-width: 200px;
+  z-index: 100;
+  min-width: 190px;
 }
 
 .menu-exportar button {
@@ -268,17 +216,17 @@ header {
   width: 100%;
   text-align: left;
   background: #fff;
+  color: #0b1d3a;
+  padding: 10px 14px;
   border: none;
-  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
   cursor: pointer;
   font-size: 13px;
-  color: #0b1d3a;
   font-weight: 600;
 }
 
-.menu-exportar button:hover {
-  background: #f0f4fb;
-}
+.menu-exportar button:last-child { border-bottom: none; }
+.menu-exportar button:hover { background: #f0f6ff; }
 
 #status-salvando {
   display: none;
@@ -298,7 +246,7 @@ header {
   border-radius: 8px;
   overflow-x: auto;
   overflow-y: auto;
-  max-height: 60vh;
+  max-height: 65vh;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   scrollbar-width: thin;
   scrollbar-color: #1e63d0 #e6e9ef;
@@ -323,9 +271,7 @@ table.tabela-dados th {
   border-right: 1px solid #1e2f52;
 }
 
-table.tabela-dados th:last-child {
-  border-right: none;
-}
+table.tabela-dados th:last-child { border-right: none; }
 
 table.tabela-dados td {
   padding: 6px 8px;
@@ -335,17 +281,10 @@ table.tabela-dados td {
   transition: background 0.4s ease;
 }
 
-table.tabela-dados td:last-child {
-  border-right: none;
-}
+table.tabela-dados td:last-child { border-right: none; }
+table.tabela-dados tbody tr:hover { background: #f7f9fc; }
 
-table.tabela-dados tbody tr:hover {
-  background: #f7f9fc;
-}
-
-.celula-salva {
-  background: #d7f5db !important;
-}
+.celula-salva { background: #d9f2df !important; }
 
 .campo-texto {
   width: 100%;
@@ -362,61 +301,38 @@ table.tabela-dados tbody tr:hover {
   background: #f0f6ff;
 }
 
-/* ---------- CHECKLIST (SIM/NÃO E 0/1) COM BORDA VISÍVEL ---------- */
-.celula-check {
+/* ---------- STATUS DE 3 ESTADOS (SIM / NÃO / N/A) ---------- */
+.celula-status { text-align: center; }
+
+.select-status {
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  border: 2px solid #ccc;
+  min-width: 70px;
   text-align: center;
 }
 
-.celula-check input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  border: 2px solid #0b1d3a;
-  border-radius: 5px;
-  cursor: pointer;
-  accent-color: #1e63d0;
-  outline: 1px solid #ccc;
-  outline-offset: 2px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
+.select-status.status-sim { background-color: #e6f4ea; border-color: #2e7d32; color: #2e7d32; }
+.select-status.status-nao { background-color: #fdecea; border-color: #c0392b; color: #c0392b; }
+.select-status.status-na { background-color: #f0f0f0; border-color: #888; color: #666; }
+.select-status.status-vazio { background-color: #fff; border-color: #ccc; color: #999; }
 
-.celula-check input[type="checkbox"]:hover {
-  border-color: #1e63d0;
-  box-shadow: 0 0 4px rgba(30, 99, 208, 0.4);
-}
+.btn-remover { border: none; background: transparent; cursor: pointer; font-size: 15px; }
 
-.celula-check input[type="checkbox"]:focus {
-  outline: 2px solid #1e63d0;
-}
-
-.btn-remover {
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-size: 15px;
-}
-
-.carregando, .erro-msg, .vazio {
-  padding: 20px;
-  text-align: center;
-  color: #666;
-}
-
+.carregando, .erro-msg, .vazio { padding: 20px; text-align: center; color: #666; }
 .erro-msg { color: #c0392b; }
 
-/* ---------- BARRA DE ROLAGEM PERSONALIZADA (Chrome/Edge/Safari) ---------- */
+/* ---------- BARRA DE ROLAGEM ---------- */
 #tabela-container::-webkit-scrollbar,
 .modal-caixa::-webkit-scrollbar,
-body::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
+body::-webkit-scrollbar { width: 10px; height: 10px; }
 
 #tabela-container::-webkit-scrollbar-track,
 .modal-caixa::-webkit-scrollbar-track,
-body::-webkit-scrollbar-track {
-  background: #e6e9ef;
-  border-radius: 10px;
-}
+body::-webkit-scrollbar-track { background: #e6e9ef; border-radius: 10px; }
 
 #tabela-container::-webkit-scrollbar-thumb,
 .modal-caixa::-webkit-scrollbar-thumb,
@@ -428,9 +344,7 @@ body::-webkit-scrollbar-thumb {
 
 #tabela-container::-webkit-scrollbar-thumb:hover,
 .modal-caixa::-webkit-scrollbar-thumb:hover,
-body::-webkit-scrollbar-thumb:hover {
-  background: #0b1d3a;
-}
+body::-webkit-scrollbar-thumb:hover { background: #0b1d3a; }
 
 /* ---------- MODAIS ---------- */
 .modal {
@@ -454,9 +368,7 @@ body::-webkit-scrollbar-thumb:hover {
   scrollbar-color: #1e63d0 #e6e9ef;
 }
 
-.modal-caixa h3 {
-  margin-top: 0;
-}
+.modal-caixa h3 { margin-top: 0; }
 
 .modal-caixa label {
   display: block;
@@ -467,25 +379,16 @@ body::-webkit-scrollbar-thumb:hover {
   color: #333;
 }
 
-.campo-modal {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
 #info-mes-origem {
   font-size: 12px;
-  color: #555;
+  color: #6a3fb5;
+  font-weight: 600;
   margin-top: 8px;
-  font-style: italic;
 }
 
-.modal-botoes {
-  display: flex;
-  gap: 10px;
-  margin-top: 18px;
-}
+.campo-modal { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
+
+.modal-botoes { display: flex; gap: 10px; margin-top: 18px; }
 
 .modal-botoes button {
   flex: 1;
@@ -496,12 +399,5 @@ body::-webkit-scrollbar-thumb:hover {
   cursor: pointer;
 }
 
-.btn-confirmar {
-  background: #2e7d32;
-  color: #fff;
-}
-
-.btn-cancelar {
-  background: #555;
-  color: #fff;
-}
+.btn-confirmar { background: #2e7d32; color: #fff; }
+.btn-cancelar { background: #555; color: #fff; }
